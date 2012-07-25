@@ -68,6 +68,7 @@ class BGLReader(gzip.GzipFile):
         gzip.GzipFile.__init__(self,fileobj=f)
         self._eof=False
         self._next_rec=None
+        self._path=path
         return
     
     @staticmethod
@@ -123,7 +124,13 @@ class BGLReader(gzip.GzipFile):
                 return False
 
     def reset(self):
-        self.seek(0)
+        # seeking caused problems so close and reopen
+        self._eof=False
+        self._next_rec=None
+        self.close()
+        f=open(self._path,'rb')
+        BGLReader._seek_to_gz_header(f)
+        gzip.GzipFile.__init__(self,fileobj=f)
 
 
 
@@ -264,6 +271,8 @@ class BGLParser:
         self.reader=reader
         
         self._read_properties(reader)
+        #props at end sometimes
+        reader.reset()
         
         charset_s=self.properties[gls.P_S_CHARSET]
         charset_t=self.properties[gls.P_T_CHARSET]
