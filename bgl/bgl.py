@@ -73,10 +73,9 @@ class BGLReader(gzip.GzipFile):
     @staticmethod
     def _seek_to_gz_header(f):
         header=util.read_ui(f,4)
-        if header==0x12340001:
-            f.seek(0x69)
-        elif header==0x12340002:
-            f.seek(0x69)
+        if header==0x12340001 or header==0x12340002:
+            offset=util.read_ui(f,2)
+            f.seek(offset)
         else:
             raise IOError("invald header: {0:#x}".format(header))
         return
@@ -238,23 +237,21 @@ class BGLParser:
         
         while True:
             rec=reader.next_rec()
-            if rec[0]==gls.DELIMITER:
-                
-                break
-            elif rec[0]==gls.PARAMETER:
+            if not rec: break
+            if rec[0]==gls.PARAMETER:
                 (k,v)=unpack_parameter(rec[1])
                 parameters_r[k]=v
             elif rec[0]==gls.PROPERTY:
                 (k,v)=unpack_property(rec[1])
                 properties_r[k]=v
-        
+
         self.properties={
             gls.P_S_CHARSET:   gls.CHARSET[ bytes(properties_r[gls.P_S_CHARSET])[0] ],
             gls.P_T_CHARSET:   gls.CHARSET[ bytes(properties_r[gls.P_T_CHARSET])[0] ],
             gls.P_TITLE:       bytes(properties_r[gls.P_TITLE]).decode('latin1'),
             gls.P_DESCRIPTION: bytes(properties_r[gls.P_DESCRIPTION]).decode('latin1')
         }
-        self.handle_properties()
+        self.handle_properties(self.properties)
         return
 
     def _parse_term_properties(self,prop:dict) -> dict:
@@ -278,12 +275,11 @@ class BGLParser:
                 (title_r,definition_r,alternatives_r,properties_r)=unpack_term(rec[1])
                 title=util.decode(bytes(title_r),charset_s)
                 
-                definition=util.decode(bytes(alt), charset_s)
+                definition=util.decode(bytes(definition_r), charset_s)
                 
                 alternatives=[]
                 for alt in alternatives_r:
                     alternatives.append( util.decode(bytes(alt), charset_s) )
-                definition=util.decode(bytes(definition_r),charset_t)
                 
                 properties=self._parse_term_properties(properties_r)
                 

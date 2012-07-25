@@ -13,7 +13,7 @@ class BGL2MDX(BGLParser):
             os.mkdir(out_path)
         except:
             pass
-        BGLParser.__init__(self,reader)
+        BGLParser.__init__(self)
         return
     
     def handle_term(self, title:str,def_frag:list,alternatives:list,properties:dict):
@@ -28,6 +28,8 @@ class BGL2MDX(BGLParser):
         f=open(self.path+".ifo","w",encoding="utf-8")
         f.writelines(["Title: ",properties[gls.P_TITLE],'\n'])
         f.writelines(["Description: ",properties[gls.P_DESCRIPTION],'\n'])
+        f.writelines(["S_Charset: ",properties[gls.P_S_CHARSET], '\n'])
+        f.writelines(["T_Charset: ",properties[gls.P_T_CHARSET], '\n'])
         f.close()
         return
 

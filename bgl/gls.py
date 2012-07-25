@@ -170,7 +170,7 @@ CHARSET = {
     0x47: "gbk",        #Simplified Chinese
     0x48: "CP1257",     #Baltic
     0x49: "CP1253",     #Greek
-    0x4A: "ISO-8859-15",#Korean
+    0x4A: "CP949",      #Korean
     0x4B: "ISO-8859-9", #Turkish
     0x4C: "ISO-8859-9", #Hebrew
     0x4D: "CP1256",     #Arabic
